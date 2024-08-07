@@ -1,4 +1,4 @@
-from schemas_dto import CategoryDTO, QueryShardUrlDTO
+from app.schemas.schemas_dto import CategoryDTO, QueryShardUrlDTO
 
 
 NAME = "name"

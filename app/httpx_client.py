@@ -5,7 +5,7 @@ from retryhttp import retry
 from httpx import AsyncClient, TransportError, HTTPStatusError, Response
 from json import JSONDecodeError
 
-from headers import headers
+from app.headers import headers
 
 
 logger = logging.getLogger(__name__)

@@ -1,7 +1,7 @@
 import asyncio
 
 from httpx_client import HTTPXClient, DataResponse
-from schemas_dto import FilterUrlDTO
+from app.schemas.schemas_dto import FilterUrlDTO
 
 
 URL_MAIN_MENU = "https://static-basket-01.wbbasket.ru/vol0/data/main-menu-ru-ru-v2.json"
