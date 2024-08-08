@@ -29,25 +29,25 @@ class HTTPXClient:
 
     def _create_client(self) -> AsyncClient:
         if self._client is None or self._client.is_closed:
-            self._client = AsyncClient(timeout=2)
+            self._client = AsyncClient()
         return self._client
 
     async def close_client(self):
         await self._client.aclose()
 
     @retry(server_error_codes=(429, 500, 502, 503, 504))
-    async def _get(self, client: AsyncClient, url: str) -> Any:
+    async def _get(self, client: AsyncClient, url: str, timeout: int | float) -> Any:
         try:
-            response = await client.get(url, headers=headers)
+            response = await client.get(url, headers=headers, timeout=timeout)
             return response.raise_for_status().json()
         except (TransportError, JSONDecodeError):
             raise ExceptionForRetry
 
-    async def get(self, url: str, args: Any = None) -> DataResponse:
+    async def get(self, url: str, args: Any = None, timeout: int | float = 2) -> DataResponse:
         client = self._create_client()
         data = None
         try:
-            data = await self._get(client, url)
+            data = await self._get(client, url, timeout)
         except Exception as e:
             logger.error("%s, %s", e, url)
         return self.response(data, args)
