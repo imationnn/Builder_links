@@ -1,23 +1,34 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+
+
+@dataclass(slots=True)
+class XsubjectDTO:
+    id: int
+    count: int
+    name: str
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        filtered_data = {k: v for k, v in data.items() if k in cls.__annotations__}
+        return cls(**filtered_data)
 
 
 @dataclass
-class QueryShardUrlDTO:
-    __slots__ = ("query", "shard", "url")
+class SubCategoryDTO:
+    name: str
     query: str
     shard: str
     url: str
+    xsubjects: list[XsubjectDTO] = field(default_factory=list)
+    total: int = 0
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        filtered_data = {k: v for k, v in data.items() if k in cls.__annotations__}
+        return cls(**filtered_data)
 
 
-@dataclass
+@dataclass(slots=True)
 class CategoryDTO:
-    __slots__ = ("category", "qsu_dto")
     category: str
-    qsu_dto: list[QueryShardUrlDTO]
-
-
-@dataclass
-class FilterUrlDTO:
-    __slots__ = ("filter_url", "category_dto")
-    filter_url: str
-    category_dto: QueryShardUrlDTO
+    sub_cat_dto: list[SubCategoryDTO]
