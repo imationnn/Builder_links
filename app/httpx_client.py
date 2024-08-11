@@ -6,7 +6,7 @@ from httpx import AsyncClient, TransportError, HTTPStatusError, Response
 from json import JSONDecodeError
 
 from app.headers import headers
-
+from app.schemas.schemas_dto import SubCategoryDTO
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ class ExceptionForRetry(HTTPStatusError):
 
 
 class DataResponse:
-    def __init__(self, response: list | dict = None, args: Any = None):
+    def __init__(self, response: list | dict = None, args: SubCategoryDTO | None = None):
         self.data = response or []
         self.args = args
 
