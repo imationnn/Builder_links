@@ -35,4 +35,4 @@ def category_name_to_name_without_underscore(name: str) -> str:
 def get_translate_category_name(category: str) -> str:
     if "_" in category:
         category = category_name_to_name_without_underscore(category)
-    return MAIN_CATEGORIES.get(category.capitalize())
+    return MAIN_CATEGORIES.get(category.capitalize(), "")
