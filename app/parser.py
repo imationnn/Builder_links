@@ -1,12 +1,16 @@
-from app.schemas.schemas_dto import CategoryDTO, QueryShardUrlDTO
-
+from app.httpx_client import DataResponse
+from app.schemas.schemas_dto import CategoryDTO, SubCategoryDTO, XsubjectDTO
 
 NAME = "name"
 CHILDS = "childs"
 SHARD = "shard"
-QUERY = "query"
-URL = "url"
 BLACKHOLE = "blackhole"
+DATA = "data"
+FILTERS = "filters"
+KEY = "key"
+XSUBJECT = "xsubject"
+ITEMS = "items"
+TOTAL = "total"
 
 
 def get_all_data_from_main_menu_by_desired_categories(
@@ -21,13 +25,27 @@ def get_all_data_from_main_menu_by_desired_categories(
     return result
 
 
-def _recursive_parse_category_main_menu(category_childs: list[dict]) -> list[QueryShardUrlDTO]:
-    query_shard = []
+def _recursive_parse_category_main_menu(category_childs: list[dict]) -> list[SubCategoryDTO]:
+    sub_cat_lst = []
     for sub_category in category_childs:
         if childs := sub_category.get(CHILDS):
-            query_shard.extend(_recursive_parse_category_main_menu(childs))
+            sub_cat_lst.extend(_recursive_parse_category_main_menu(childs))
         else:
             if sub_category[SHARD] == BLACKHOLE:
                 continue
-            query_shard.append(QueryShardUrlDTO(sub_category[QUERY], sub_category[SHARD], sub_category[URL]))
-    return query_shard
+            sub_cat_lst.append(SubCategoryDTO.from_dict(sub_category))
+    return sub_cat_lst
+
+
+def get_xsubjects_from_response(lst_responses: list[DataResponse]) -> list[SubCategoryDTO]:
+    sub_cat_lst = []
+    for response in lst_responses:
+        if not (response_data := response.data.get(DATA)):
+            continue
+        for data_filter in response_data[FILTERS]:
+            if data_filter[KEY] == XSUBJECT:
+                response.args.xsubjects = [XsubjectDTO.from_dict(item) for item in data_filter[ITEMS]]
+                break
+        response.args.total = response_data.get(TOTAL, 0)
+        sub_cat_lst.append(response.args)
+    return sub_cat_lst

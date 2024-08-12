@@ -18,7 +18,7 @@ class ExceptionForRetry(HTTPStatusError):
 
 class DataResponse:
     def __init__(self, response: list | dict = None, args: SubCategoryDTO | None = None):
-        self.data = response or []
+        self.data = response or {}
         self.args = args
 
 
