@@ -80,7 +80,7 @@ class RedisStorage:
         db_key = self.key_builder.build(category_name, SUBCATEGORY, chapter_type)
         await self._redis.srem(db_key, *subcat_items)
 
-    async def delete_bad_xsubject(
+    async def delete_xsubject(
             self,
             category_name: str,
             chapter_type: TYPE_CHAPTER,
