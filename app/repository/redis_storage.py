@@ -15,7 +15,7 @@ CATALOG = "catalog"
 URLS = "urls"
 REGISTRATION = "registration_of_parsers"
 
-TYPE_CHAPTER = Literal["good", "bad", "neutral"]
+TYPE_CHAPTER = Literal["good", "bad"]
 
 
 class KeyBuilder:
@@ -55,23 +55,21 @@ class RedisStorage:
         db_key = self.key_builder.build(category_name, XSUBJECTS, chapter_type)
         await self._redis.sadd(db_key, *xsubject_items)
 
-    async def check_subcategory(
+    async def get_subcategory(
             self,
             category_name: str,
-            chapter_type: TYPE_CHAPTER,
-            subcat_item: str
-    ) -> bool:
+            chapter_type: TYPE_CHAPTER
+    ) -> set:
         db_key = self.key_builder.build(category_name, SUBCATEGORY, chapter_type)
-        return bool(await self._redis.sismember(db_key, subcat_item))
+        return await self._redis.smembers(db_key)
 
-    async def check_xsubject(
+    async def get_xsubject(
             self,
             category_name: str,
-            chapter_type: TYPE_CHAPTER,
-            xsubject_item: str
-    ) -> bool:
+            chapter_type: TYPE_CHAPTER
+    ) -> set:
         db_key = self.key_builder.build(category_name, XSUBJECTS, chapter_type)
-        return bool(await self._redis.sismember(db_key, xsubject_item))
+        return await self._redis.smembers(db_key)
 
     async def delete_subcategory(
             self,
