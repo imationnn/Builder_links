@@ -36,3 +36,7 @@ def get_translate_category_name(category: str) -> str:
     if "_" in category:
         category = category_name_to_name_without_underscore(category)
     return MAIN_CATEGORIES.get(category.capitalize(), "")
+
+
+def get_lst_category_name_without_underscore(categories: list[str]) -> list[str]:
+    return [category_name_to_name_without_underscore(category) for category in categories]
