@@ -1,17 +1,4 @@
-
-MAIN_CATEGORIES = {
-    "Женщинам": "woman",
-    "Обувь": "shoes",
-    "Детям": "kids",
-    "Мужчинам": "man",
-    "Дом": "house",
-    "Электроника": "elect",
-    "Бытовая техника": "technique",
-    "Спорт": "sport",
-    "Для ремонта": "repair",
-    "Сад и дача": "village",
-    "Продукты": "food"
-}
+from app.config.categories import MAIN_CATEGORIES
 
 
 def category_name_to_name_with_underscore(name: str) -> str:
