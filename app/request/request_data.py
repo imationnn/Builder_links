@@ -1,11 +1,11 @@
 import asyncio
 
-from httpx_client import HTTPXClient, DataResponse
+from app.request.httpx_client import HTTPXClient, DataResponse
 from app.schemas.schemas_dto import SubCategoryDTO
 from app.create_links import create_filter_url
 
 
-URL_MAIN_MENU = "https://static-basket-01.wbbasket.ru/vol0/data/main-menu-ru-ru-v2.json"
+URL_MAIN_MENU = "https://static-basket-01.wbbasket.ru/vol0/data/main-menu-ru-ru-v3.json"
 
 
 class RequestData(HTTPXClient):

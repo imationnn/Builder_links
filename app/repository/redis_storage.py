@@ -98,7 +98,7 @@ class RedisStorage:
         data = {i.query: f"{i.name}|{i.url}" for i in lst_subcategory}
         await self._redis.hset(db_key, mapping=data)
 
-    async def get_subcategory_from_catalog(
+    async def get_and_del_subcategory_from_catalog(
             self,
             category_name: str,
             subcategory: str
@@ -119,7 +119,7 @@ class RedisStorage:
         data = {i.id: i.name for i in lst_xsubjects}
         await self._redis.hset(db_key, mapping=data)
 
-    async def get_xsubject_from_catalog(
+    async def get_and_del_xsubject_from_catalog(
             self,
             category_name: str,
             xsubject: str | int

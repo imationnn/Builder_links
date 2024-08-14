@@ -1,4 +1,4 @@
-from app.httpx_client import DataResponse
+from app.request.httpx_client import DataResponse
 from app.schemas.schemas_dto import CategoryDTO, SubCategoryDTO, XsubjectDTO
 
 NAME = "name"
