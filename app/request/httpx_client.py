@@ -5,7 +5,7 @@ from retryhttp import retry
 from httpx import AsyncClient, TransportError, HTTPStatusError, Response
 from json import JSONDecodeError
 
-from app.headers import headers
+from app.request.headers import headers
 from app.schemas.schemas_dto import SubCategoryDTO
 
 logger = logging.getLogger(__name__)
