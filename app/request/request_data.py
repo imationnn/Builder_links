@@ -3,6 +3,7 @@ import asyncio
 from app.request.httpx_client import HTTPXClient, DataResponse
 from app.schemas.schemas_dto import SubCategoryDTO
 from app.create_links import create_filter_url
+from app.config.settings import settings
 
 
 URL_MAIN_MENU = "https://static-basket-01.wbbasket.ru/vol0/data/main-menu-ru-ru-v3.json"
@@ -20,9 +21,9 @@ class RequestData(HTTPXClient):
     async def get_xsubjects(
             self,
             sub_cat: list[SubCategoryDTO],
-            chunk_size: int = 30,
-            time_sleep_between_request: int | float = 0.1,
-            time_sleep_between_chunk: int | float = 1
+            chunk_size: int = settings.chunk_size,
+            time_sleep_between_request: int | float = settings.sleep_between_request,
+            time_sleep_between_chunk: int | float = settings.sleep_between_chunk
     ) -> list[DataResponse]:
         offset = 0
         result: list[DataResponse] = []
