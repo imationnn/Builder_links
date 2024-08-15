@@ -1,9 +1,10 @@
 from typing import Sequence, Literal
+import pickle
 
 from redis.asyncio import Redis
 
 from app.config.settings import RedisConfig
-from app.schemas.schemas_dto import SubCategoryDTO, XsubjectDTO
+from app.schemas.schemas_dto import SubCategoryDTO, XsubjectDTO, CategoryDTO
 from app.utils import (get_translate_category_name,
                        category_name_to_name_without_underscore,
                        get_lst_category_name_without_underscore)
@@ -14,6 +15,10 @@ XSUBJECTS = "xsubjects"
 CATALOG = "catalog"
 URLS = "urls"
 REGISTRATION = "registration_of_parsers"
+CAT_NOTIFY = "category_notification"
+ITEMS_ALERTS = "items_sent_alerts"
+SET_ITEMS_ALERTS = "set_items_sent_alerts"
+
 
 TYPE_CHAPTER = Literal["good", "bad"]
 
@@ -159,6 +164,26 @@ class RedisStorage:
 
     async def get_categories_for_parsing(self) -> list:
         return await self._redis.hkeys(REGISTRATION)
+
+    async def add_category_for_notification(self, category: CategoryDTO) -> None:
+        await self._redis.sadd(CAT_NOTIFY, pickle.dumps(category).decode('latin1'))
+
+    async def get_category_for_notification(self) -> list[CategoryDTO]:
+        return [pickle.loads(category.encode('latin1')) for category in await self._redis.smembers(CAT_NOTIFY)]
+
+    async def delete_category_for_notification(self) -> None:
+        await self._redis.delete(CAT_NOTIFY)
+
+    async def add_items_for_sent_alerts(self, data: dict) -> None:
+        await self._redis.hset(ITEMS_ALERTS, mapping=data)
+        await self._redis.sadd(SET_ITEMS_ALERTS, *data.values())
+
+    async def get_item_from_db_for_sent_alerts(self, item_id: str) -> str | None:
+        item = await self._redis.hget(ITEMS_ALERTS, item_id)
+        if item:
+            await self._redis.srem(SET_ITEMS_ALERTS, item)
+            await self._redis.hdel(ITEMS_ALERTS, item_id)
+        return item
 
     async def close(self) -> None:
         await self._redis.aclose()
