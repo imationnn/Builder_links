@@ -73,4 +73,5 @@ async def create_and_save_catalog_urls(
                     min_count_product,
                     max_count_product
                 ))
-        await save_function(category.category, *urls)
+        if urls:
+            await save_function(category.category, *urls)

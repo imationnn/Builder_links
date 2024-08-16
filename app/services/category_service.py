@@ -33,7 +33,7 @@ class CategoryService:
         await self.repository.add_xsubjects(
             category_name,
             xsubject.type_chapter,
-            *xsubject.list_subcategory
+            *xsubject.list_xsubjects
         )
 
     async def delete_xsubjects(
