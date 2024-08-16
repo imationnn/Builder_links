@@ -64,7 +64,7 @@ class RedisStorage:
             self,
             category_name: str,
             chapter_type: TYPE_CHAPTER
-    ) -> set:
+    ) -> set[str]:
         db_key = self.key_builder.build(category_name, SUBCATEGORY, chapter_type)
         return await self._redis.smembers(db_key)
 
@@ -72,9 +72,9 @@ class RedisStorage:
             self,
             category_name: str,
             chapter_type: TYPE_CHAPTER
-    ) -> set:
+    ) -> set[int]:
         db_key = self.key_builder.build(category_name, XSUBJECTS, chapter_type)
-        return await self._redis.smembers(db_key)
+        return {int(xsubject) for xsubject in await self._redis.smembers(db_key)}
 
     async def delete_subcategory(
             self,
@@ -162,26 +162,32 @@ class RedisStorage:
             category = [category]
         await self._redis.hdel(REGISTRATION, *get_lst_category_name_without_underscore(category))
 
-    async def get_categories_for_parsing(self) -> list:
+    async def get_categories_for_parsing(self) -> list[str] | list:
         return await self._redis.hkeys(REGISTRATION)
 
     async def add_category_for_notification(self, category: CategoryDTO) -> None:
         await self._redis.sadd(CAT_NOTIFY, pickle.dumps(category).decode('latin1'))
 
-    async def get_category_for_notification(self) -> list[CategoryDTO]:
+    async def get_category_for_notification(self) -> list[CategoryDTO] | list:
         return [pickle.loads(category.encode('latin1')) for category in await self._redis.smembers(CAT_NOTIFY)]
 
     async def delete_category_for_notification(self) -> None:
         await self._redis.delete(CAT_NOTIFY)
 
-    async def add_items_for_sent_alerts(self, data: dict) -> None:
+    async def add_items_for_sent_alerts(
+            self,
+            data: dict[str | int, list[str]],
+            notify_items: list[str | int]
+    ) -> None:
+        data = {k: "|".join(v) for k, v in data.items()}
         await self._redis.hset(ITEMS_ALERTS, mapping=data)
-        await self._redis.sadd(SET_ITEMS_ALERTS, *data.values())
+        await self._redis.sadd(SET_ITEMS_ALERTS, *notify_items)
 
-    async def get_item_from_db_for_sent_alerts(self, item_id: str) -> str | None:
+    async def get_item_from_db_for_sent_alerts(self, item_id: str) -> list[str] | None:
         item = await self._redis.hget(ITEMS_ALERTS, item_id)
         if item:
-            await self._redis.srem(SET_ITEMS_ALERTS, item)
+            item = item.split("|")
+            await self._redis.srem(SET_ITEMS_ALERTS, item[1])
             await self._redis.hdel(ITEMS_ALERTS, item_id)
         return item
 
