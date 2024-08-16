@@ -9,3 +9,5 @@ def configure_logging(write_logger_level, stream_logger_level):
     rothand.setLevel(write_logger_level)
     stream = logging.StreamHandler()
     logging.basicConfig(level=stream_logger_level, format=form, handlers=[stream, rothand])
+    httpx_log = logging.getLogger('httpx')
+    httpx_log.setLevel(logging.WARNING)
