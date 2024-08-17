@@ -4,7 +4,7 @@ import pickle
 from redis.asyncio import Redis
 
 from app.config.settings import RedisConfig
-from app.schemas.schemas_dto import SubCategoryDTO, XsubjectDTO, CategoryDTO
+from app.schemas.schemas_dto import SubCategoryDTO, XsubjectDTO, CategoryDTO, NotifyItem
 from app.utils import (get_translate_category_name,
                        category_name_to_name_without_underscore,
                        get_lst_category_name_without_underscore)
@@ -174,22 +174,28 @@ class RedisStorage:
     async def delete_category_for_notification(self) -> None:
         await self._redis.delete(CAT_NOTIFY)
 
+    async def check_exists_item_for_notification(self, item: str | int) -> bool:
+        return bool(await self._redis.sismember(SET_ITEMS_ALERTS, item))
+
     async def add_items_for_sent_alerts(
             self,
-            data: dict[str | int, list[str]],
+            data: dict[int, NotifyItem],
             notify_items: list[str | int]
     ) -> None:
-        data = {k: "|".join(v) for k, v in data.items()}
+        data = {k: pickle.dumps(v).decode('latin1') for k, v in data.items()}
         await self._redis.hset(ITEMS_ALERTS, mapping=data)
         await self._redis.sadd(SET_ITEMS_ALERTS, *notify_items)
 
-    async def get_item_from_db_for_sent_alerts(self, item_id: str) -> list[str] | None:
-        item = await self._redis.hget(ITEMS_ALERTS, item_id)
+    async def get_item_from_db_for_sent_alerts(self, item_id: str | int) -> NotifyItem | None:
+        item: str | None = await self._redis.hget(ITEMS_ALERTS, item_id)
         if item:
-            item = item.split("|")
-            await self._redis.srem(SET_ITEMS_ALERTS, item[1])
+            item: NotifyItem = pickle.loads(item.encode('latin1'))
+            await self._redis.srem(SET_ITEMS_ALERTS, item.subcategory or item.xsubject)
             await self._redis.hdel(ITEMS_ALERTS, item_id)
         return item
+
+    async def get_last_item_alert_key(self) -> int:
+        return max(map(int, await self._redis.hkeys(ITEMS_ALERTS)), default=0)
 
     async def close(self) -> None:
         await self._redis.aclose()
