@@ -32,3 +32,10 @@ class SubCategoryDTO:
 class CategoryDTO:
     category: str
     sub_cat_dto: list[SubCategoryDTO]
+
+
+@dataclass(slots=True)
+class NotifyItem:
+    category_name: str
+    subcategory: str = None
+    xsubject: int = None
