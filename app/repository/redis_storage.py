@@ -186,13 +186,16 @@ class RedisStorage:
         await self._redis.hset(ITEMS_ALERTS, mapping=data)
         await self._redis.sadd(SET_ITEMS_ALERTS, *notify_items)
 
-    async def get_item_from_db_for_sent_alerts(self, item_id: str | int) -> NotifyItem | None:
+    async def get_item_from_db_sent_alerts(self, item_id: str | int) -> NotifyItem | None:
         item: str | None = await self._redis.hget(ITEMS_ALERTS, item_id)
         if item:
             item: NotifyItem = pickle.loads(item.encode('latin1'))
             await self._redis.srem(SET_ITEMS_ALERTS, item.subcategory or item.xsubject)
             await self._redis.hdel(ITEMS_ALERTS, item_id)
         return item
+
+    async def get_all_items_waiting_to_be_added(self) -> dict[int, NotifyItem] | dict:
+        return {int(k): pickle.loads(v.encode('latin1')) for k, v in (await self._redis.hgetall(ITEMS_ALERTS)).items()}
 
     async def get_last_item_alert_key(self) -> int:
         return max(map(int, await self._redis.hkeys(ITEMS_ALERTS)), default=1)
