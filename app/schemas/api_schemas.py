@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 
 from app.repository.redis_storage import TYPE_CHAPTER
+from app.schemas.schemas_dto import NotifyItem
 
 
 class Subcategory(BaseModel):
@@ -23,3 +24,8 @@ class RegisterParserIn(BaseModel):
 class RegisterParserOut(BaseModel):
     category_name: str
     urls: set
+
+
+class NewItemsOut(BaseModel):
+    id: int | str
+    item: NotifyItem
