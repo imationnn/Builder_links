@@ -5,7 +5,7 @@ from retryhttp import retry
 from httpx import AsyncClient, TransportError, HTTPStatusError, Response
 from json import JSONDecodeError
 
-from app.request.headers import headers
+from app.request.headers import headers as wb_headers
 from app.schemas.schemas_dto import SubCategoryDTO
 
 logger = logging.getLogger(__name__)
@@ -36,9 +36,17 @@ class HTTPXClient:
         await self._client.aclose()
 
     @retry(server_error_codes=(429, 500, 502, 503, 504))
-    async def _get(self, client: AsyncClient, url: str, timeout: int | float) -> Any:
+    async def _request(
+            self,
+            method: str,
+            client: AsyncClient,
+            url: str,
+            timeout: int | float,
+            headers: dict = None,
+            content: str = None
+    ) -> Any:
         try:
-            response = await client.get(url, headers=headers, timeout=timeout)
+            response = await client.request(method, url, headers=headers, timeout=timeout, content=content)
             return response.raise_for_status().json()
         except (TransportError, JSONDecodeError):
             raise ExceptionForRetry
@@ -47,7 +55,14 @@ class HTTPXClient:
         client = self._create_client()
         data = None
         try:
-            data = await self._get(client, url, timeout)
+            data = await self._request("GET", client, url, timeout, wb_headers)
         except Exception as e:
             logger.error("%s, %s", e, url)
         return self.response(data, args)
+
+    async def post(self, url: str, content, timeout: int | float = 2) -> None:
+        client = self._create_client()
+        try:
+            await self._request("POST", client, url, timeout, content=content)
+        except Exception as e:
+            logger.error("%s, %s", e, url)
