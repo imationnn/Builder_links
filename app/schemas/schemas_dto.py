@@ -21,6 +21,7 @@ class SubCategoryDTO:
     url: str
     xsubjects: list[XsubjectDTO] = field(default_factory=list)
     total: int = 0
+    id: int | None = None
 
     @classmethod
     def from_dict(cls, data: dict):
@@ -37,5 +38,7 @@ class CategoryDTO:
 @dataclass(slots=True)
 class NotifyItem:
     category_name: str
+    item_name: str
+    url: str
     subcategory: str = None
     xsubject: int = None

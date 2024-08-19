@@ -38,8 +38,11 @@ def select_type_sorting(
         count: int,
         min_count: int,
         max_count: int,
+        min_count_filter: int,
         xsubject_id: str | int | None = None
 ) -> list[str]:
+    if count < min_count_filter:
+        return []
     if min_count < count < max_count:
         sorts = PRICE_UP, PRICE_DOWN
     else:
@@ -49,9 +52,10 @@ def select_type_sorting(
 
 async def create_and_save_catalog_urls(
         lst_categories: list[CategoryDTO],
-        save_function: Callable[[str, list[str]], Awaitable[None]],
+        save_function: Callable[[str, str], Awaitable[None]],
         min_count_product: int = settings.min_count_for_sort,
-        max_count_product: int = settings.max_count_for_sort
+        max_count_product: int = settings.max_count_for_sort,
+        min_count_filter: int = settings.min_count_for_filter
 ) -> None:
     for category in lst_categories:
         urls = []
@@ -63,6 +67,7 @@ async def create_and_save_catalog_urls(
                     xsubject.count,
                     min_count_product,
                     max_count_product,
+                    min_count_filter,
                     xsubject.id
                 ))
             if not subcategory.xsubjects:
@@ -71,7 +76,8 @@ async def create_and_save_catalog_urls(
                     subcategory.query,
                     subcategory.total,
                     min_count_product,
-                    max_count_product
+                    max_count_product,
+                    min_count_filter
                 ))
         if urls:
             await save_function(category.category, *urls)
