@@ -1,4 +1,4 @@
-from typing import Sequence, Literal
+from typing import Literal
 import pickle
 
 from redis.asyncio import Redis
@@ -27,7 +27,7 @@ class KeyBuilder:
     def __init__(self, separator: str = "_"):
         self.separator = separator
 
-    def build(self, category: str, *args: Sequence[str]) -> str:
+    def build(self, category: str, *args: str) -> str:
         category = get_translate_category_name(category)
         return self.separator.join([category, *args])
 
@@ -46,7 +46,7 @@ class RedisStorage:
             self,
             category_name: str,
             chapter_type: TYPE_CHAPTER,
-            *subcat_items: str | int | Sequence[str | int]
+            *subcat_items: str | int
     ) -> None:
         db_key = self.key_builder.build(category_name, SUBCATEGORY, chapter_type)
         await self._redis.sadd(db_key, *subcat_items)
@@ -55,7 +55,7 @@ class RedisStorage:
             self,
             category_name: str,
             chapter_type: TYPE_CHAPTER,
-            *xsubject_items: str | int | Sequence[str | int]
+            *xsubject_items: str | int
     ) -> None:
         db_key = self.key_builder.build(category_name, XSUBJECTS, chapter_type)
         await self._redis.sadd(db_key, *xsubject_items)
@@ -80,7 +80,7 @@ class RedisStorage:
             self,
             category_name: str,
             chapter_type: TYPE_CHAPTER,
-            *subcat_items: str | int | Sequence[str | int]
+            *subcat_items: str | int
     ) -> None:
         db_key = self.key_builder.build(category_name, SUBCATEGORY, chapter_type)
         await self._redis.srem(db_key, *subcat_items)
@@ -89,7 +89,7 @@ class RedisStorage:
             self,
             category_name: str,
             chapter_type: TYPE_CHAPTER,
-            *xsubject_item: str | int | Sequence[str | int]
+            *xsubject_item: str | int
     ) -> None:
         db_key = self.key_builder.build(category_name, XSUBJECTS, chapter_type)
         await self._redis.srem(db_key, *xsubject_item)
@@ -136,7 +136,7 @@ class RedisStorage:
             await self._redis.hdel(db_key, xsubject)
         return value or ""
 
-    async def add_urls(self, category_name: str, *urls: str | Sequence[str]) -> None:
+    async def add_urls(self, category_name: str, *urls: str) -> None:
         db_key = self.key_builder.build(category_name, URLS)
         await self._redis.sadd(db_key, *urls)
 
@@ -195,7 +195,7 @@ class RedisStorage:
         return item
 
     async def get_last_item_alert_key(self) -> int:
-        return max(map(int, await self._redis.hkeys(ITEMS_ALERTS)), default=0)
+        return max(map(int, await self._redis.hkeys(ITEMS_ALERTS)), default=1)
 
     async def close(self) -> None:
         await self._redis.aclose()
