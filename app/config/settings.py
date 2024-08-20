@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     sleep_between_chunk: int | float
     use_notify_send: bool
     use_notify_log: bool
+    time_create_urls: int
     notify_config: NotifyConfig = NotifyConfig()
 
 
