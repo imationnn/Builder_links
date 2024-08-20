@@ -1,12 +1,12 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends
 
 from app.repository.redis_storage import RedisStorage, TYPE_CHAPTER
 from app.schemas.api_schemas import NewItemsOut
 
 
 class NewItemService:
-    def __init__(self):
-        self.repository = RedisStorage()
+    def __init__(self, repository: RedisStorage = Depends()):
+        self.repository = repository
 
     async def add_new_item_after_notification(self, db_id: str | int, type_chapter: TYPE_CHAPTER) -> None:
         item = await self.repository.get_item_from_db_sent_alerts(db_id)

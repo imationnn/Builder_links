@@ -1,4 +1,4 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends
 from starlette import status
 
 from app.repository.redis_storage import RedisStorage
@@ -7,8 +7,8 @@ from app.services.service_utils import check_category_exist
 
 
 class RegistrationService:
-    def __init__(self):
-        self.repository = RedisStorage()
+    def __init__(self, repository: RedisStorage = Depends()):
+        self.repository = repository
 
     def __raise_error(self, category: str) -> None:
         raise HTTPException(

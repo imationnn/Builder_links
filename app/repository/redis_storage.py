@@ -1,6 +1,7 @@
 from typing import Literal
 import pickle
 
+from fastapi import Depends
 from redis.asyncio import Redis
 
 from app.config.settings import RedisConfig
@@ -32,15 +33,31 @@ class KeyBuilder:
         return self.separator.join([category, *args])
 
 
-class RedisStorage:
-    def __init__(self, redis_config: RedisConfig = RedisConfig(), key_builder=KeyBuilder()):
-        self.config = redis_config
-        self.key_builder = key_builder
+class RedisClient:
+    def __init__(self):
+        self.config = RedisConfig()
         self._redis = Redis(host=self.config.redis_host,
                             port=self.config.redis_port,
                             db=self.config.redis_db_name,
                             password=self.config.redis_password,
                             decode_responses=True)
+
+    @property
+    def redis(self) -> Redis:
+        return self._redis
+
+    async def client(self) -> Redis:
+        async with self._redis as client:
+            yield client
+
+    async def close(self) -> None:
+        await self._redis.aclose()
+
+
+class RedisStorage:
+    def __init__(self, redis_client: Redis = Depends(RedisClient().client)):
+        self._redis = redis_client
+        self.key_builder = KeyBuilder()
 
     async def add_subcategory(
             self,
@@ -198,7 +215,4 @@ class RedisStorage:
         return {int(k): pickle.loads(v.encode('latin1')) for k, v in (await self._redis.hgetall(ITEMS_ALERTS)).items()}
 
     async def get_last_item_alert_key(self) -> int:
-        return max(map(int, await self._redis.hkeys(ITEMS_ALERTS)), default=1)
-
-    async def close(self) -> None:
-        await self._redis.aclose()
+        return max(map(int, await self._redis.hkeys(ITEMS_ALERTS)), default=0)
