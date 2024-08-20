@@ -132,6 +132,9 @@ class RedisStorage:
             await self._redis.hdel(db_key, subcategory)
         return value or ["", ""]
 
+    async def check_subcategory_catalog(self, category_name: str) -> bool:
+        return bool(await self._redis.exists(self.key_builder.build(category_name, SUBCATEGORY, CATALOG)))
+
     async def add_xsubjects_to_catalog(
             self,
             category_name: str,
