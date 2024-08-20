@@ -13,8 +13,6 @@ class RequestData(HTTPXClient):
 
     async def get_main_menu(self) -> list[dict]:
         response = await self.get(URL_MAIN_MENU, timeout=5)
-        if not response.data:
-            pass  # TODO добавить оповещение
         await self.close_client()
         return response.data
 
