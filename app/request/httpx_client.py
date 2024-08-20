@@ -43,10 +43,11 @@ class HTTPXClient:
             url: str,
             timeout: int | float,
             headers: dict = None,
-            content: str = None
+            content: str = None,
+            json: dict = None
     ) -> Any:
         try:
-            response = await client.request(method, url, headers=headers, timeout=timeout, content=content)
+            response = await client.request(method, url, headers=headers, timeout=timeout, content=content, json=json)
             return response.raise_for_status().json()
         except (TransportError, JSONDecodeError):
             raise ExceptionForRetry
@@ -60,9 +61,9 @@ class HTTPXClient:
             logger.error("%s, %s", e, url)
         return self.response(data, args)
 
-    async def post(self, url: str, content, timeout: int | float = 2) -> None:
+    async def post(self, url: str, content: str | None = None, timeout: int | float = 2, json: dict | None = None) -> None:
         client = self._create_client()
         try:
-            await self._request("POST", client, url, timeout, content=content)
+            await self._request("POST", client, url, timeout, content=content, json=json)
         except Exception as e:
             logger.error("%s, %s", e, url)

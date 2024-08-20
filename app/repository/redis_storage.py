@@ -174,8 +174,8 @@ class RedisStorage:
         data = {i: url for i in get_lst_category_name_without_underscore(category)}
         await self._redis.hset(REGISTRATION, mapping=data)
 
-    async def get_parser_url(self, category_name: str) -> str:
-        return await self._redis.hget(REGISTRATION, category_name)
+    async def get_parser_urls(self) -> dict[str, str]:
+        return await self._redis.hgetall(REGISTRATION)
 
     async def delete_parser_from_register(self, category: str | list[str]) -> None:
         if isinstance(category, str):
