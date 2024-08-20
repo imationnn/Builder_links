@@ -2,7 +2,6 @@ amqp==5.2.0
 annotated-types==0.7.0
 anyio==4.4.0
 billiard==4.2.0
-celery==5.4.0
 certifi==2024.7.4
 charset-normalizer==3.3.2
 click==8.1.7
@@ -55,3 +54,5 @@ vine==5.1.0
 watchfiles==0.23.0
 wcwidth==0.2.13
 websockets==12.0
+APScheduler==3.10.4
+apscheduler-di==0.1.0
