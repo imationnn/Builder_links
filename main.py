@@ -8,9 +8,6 @@ from app.api.routers import main_router
 from app.scheduler import Scheduler
 
 
-logger = logging.getLogger(__name__)
-
-
 @asynccontextmanager
 async def lifespan(_):
     configure_logging(write_logger_level=logging.WARNING, stream_logger_level=logging.INFO)
