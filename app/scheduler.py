@@ -8,7 +8,7 @@ from apscheduler_di import ContextSchedulerDecorator
 
 from app.client import Builder
 from app.repository.redis_storage import RedisStorage, RedisClient
-from app.config.settings import settings
+from app.config.settings import settings, RedisConfig
 
 
 logger = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ class Scheduler:
         self.id_job_get_urls = "get_urls"
         self.scheduler = ContextSchedulerDecorator(
             AsyncIOScheduler(
-                jobstores={self.job_store: RedisJobStore()},
+                jobstores={self.job_store: RedisJobStore(host=RedisConfig().redis_host)},
                 timezone=zoneinfo.ZoneInfo("Europe/Moscow")
             )
         )
