@@ -1,0 +1,28 @@
+services:
+  redis:
+    image: redis:7.2-alpine
+    volumes:
+      - ./redisdata:/data
+    restart: always
+    networks:
+      - builder
+
+  bilder:
+    build: .
+    env_file:
+      - .env
+    ports:
+      - ${HOST}:${PORT}:80
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Moscow
+      - REDIS_HOST=redis
+    depends_on:
+      - redis
+    networks:
+      - builder
+
+networks:
+  builder:
+    name: builder
+    driver: bridge
