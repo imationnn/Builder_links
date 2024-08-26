@@ -1,3 +1,6 @@
+from itertools import chain
+from math import ceil
+
 from app.schemas.schemas_dto import CategoryDTO
 from app.config.settings import settings
 from app.repository.redis_storage import RedisStorage
@@ -24,12 +27,13 @@ def create_catalog_url(
         shard: str,
         query: str,
         sort: str,
+        count_page: int,
         xsubject_id: str | int | None = None
-) -> str:
+) -> list[str]:
     url = CATALOG_URL.format(shard, query, sort=sort)
     if xsubject_id is not None:
-        url = url + f"&xsubject={xsubject_id}"
-    return url
+        url = f"{url}&xsubject={xsubject_id}"
+    return [url.format(page) for page in range(1, count_page + 1)]
 
 
 class ConstructUrl:
@@ -37,8 +41,22 @@ class ConstructUrl:
         self.repository = repository
 
     @classmethod
-    def _select_type_sorting(
+    def _get_count_page(
             cls,
+            total: int,
+            min_count: int,
+            max_count: int,
+            min_count_filter: int
+    ) -> int:
+        if total > max_count:
+            total = min_count
+        count_page, rest_count = divmod(total, 100)
+        if rest_count >= min_count_filter:
+            count_page += 1
+        return count_page
+
+    def _select_type_sorting(
+            self,
             shard: str,
             query: str,
             count: int,
@@ -49,11 +67,15 @@ class ConstructUrl:
     ) -> list[str]:
         if count < min_count_filter:
             return []
+        count_page = self._get_count_page(count, min_count, max_count, min_count_filter)
         if min_count < count < max_count:
             sorts = PRICE_UP, PRICE_DOWN
+            count_page = ceil(count_page / 2)
         else:
             sorts = POPULAR,
-        return [create_catalog_url(shard, query, sort, xsubject_id) for sort in sorts]
+        return chain.from_iterable(
+            [create_catalog_url(shard, query, sort, count_page, xsubject_id) for sort in sorts]
+        )
 
     async def create_and_save_catalog_urls(
             self,
