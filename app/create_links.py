@@ -36,8 +36,9 @@ class ConstructUrl:
     def __init__(self, repository: RedisStorage):
         self.repository = repository
 
-    @staticmethod
+    @classmethod
     def _select_type_sorting(
+            cls,
             shard: str,
             query: str,
             count: int,

@@ -9,5 +9,12 @@ MAIN_CATEGORIES = {
     "Спорт": "sport",
     "Для ремонта": "repair",
     "Сад и дача": "village",
-    "Продукты": "food"
+    "Продукты": "food",
+    "Аксессуары": "accessories",
+    "Игрушки": "toys",
+    "Мебель": "furniture",
+    "Автотовары": "avto",
+    "Ювелирные изделия": "jewelry",
+    "Красота": "beauty",
+    "Здоровье": "health"
 }

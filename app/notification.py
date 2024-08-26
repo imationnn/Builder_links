@@ -32,8 +32,9 @@ class Notification:
         self.client = HTTPXClient()
         self.template = Template(NOTIFY_TEMPLATE)
 
-    @staticmethod
+    @classmethod
     async def _add_notify_item(
+            cls,
             obj: SubCategoryDTO | XsubjectDTO,
             category_name: str,
             notify_id: int,
